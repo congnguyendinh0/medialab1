@@ -5,50 +5,60 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @Embeddable
-public class Address extends BaseEntity {	
+public class Address extends BaseEntity {
+	private String street;
+	private String postcode;
+	private String city;
+	private String land;
+
+	protected Address() {
+		this("some street", "some plz", "some city", "some land");
+	}
+
+	public Address(String street, String postcode, String city, String land) {
+		this.street = street;
+		this.postcode = postcode;
+		this.city = city;
+		this.land = land;
+	}
+
 	@NotNull
 	@Size(min = 0, max = 63)
-    private String street;
-	
+	public String getStreet() {
+		return street;
+	}
+
+	public void setStreet(String street) {
+		this.street = street;
+	}
+
 	@NotNull
 	@Size(min = 0, max = 15)
-    private String postcode;
-	
+	public String getPostCode() {
+		return postcode;
+	}
+
+	public void setPostCode(String postcode) {
+		this.postcode = postcode;
+	}
+
 	@NotNull
 	@Size(min = 1, max = 63)
-    private String city;
+	public String getCity() {
+		return city;
+	}
 
-    public String getStreet() {
-        return street;
-    }
+	public void setCity(String city) {
+		this.city = city;
+	}
 
-    public void setStreet(String street) {
-        this.street = street;
-    }
+	@NotNull
+	@Size(min = 1, max = 63)
+	public String getLand() {
+		return land;
+	}
 
-    public String getPostCode() {
-        return postcode;
-    }
-
-    public void setPostCode(String postcode) {
-        this.postcode = postcode;
-    }
-    
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    protected Address() {
-    	this("some street", "some plz", "some city");
-    }
-    
-    public Address(String street, String postcode, String city) {
-    	this.street = street;
-    	this.postcode = postcode;
-    	this.city = city;
-    }
+	public void setLand(String land) {
+		this.land = land;
+	}
 }
