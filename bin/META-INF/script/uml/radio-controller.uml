@@ -1,0 +1,8 @@
+// UML entity-relationship diagram for radio-controller
+// Render using https://yuml.me/diagram/plain/class/draw
+[Controller| +active:Boolean; +_audioContext:AudioContext; +_audioVolume:GainNode; +_sessionOwner:Object; | +reset(); +display(); +displayError(error:Error); +_readAsArrayBuffer(blob:Blob):ArrayBuffer; +_startTrackPlayback(audioBuffer:ArrayBuffer audioProcessors:Audio​Node *):async; +_negotiateLocalDescription(connection:RTCPeerConnection offering:Boolean):Promise; ]
+[WelcomeController|| +display():async; +login():async;]-^[Controller]
+[PreferencesController|| +display():async; +displaySessionOwner(); +storeSessionOwner():async; +storeSessionOwnerAvatar(avatarFile:File):async;]-^[Controller]
+[ServerRadioController| +audioSource:AudioBufferSourceNode; +recordingPromise:Promise; +fader:GainNode; | +reset(); +display(); +addMatchingTracks(genres:String *,artists:String *):async; +displayLyrics(track:Object):async; +startNextTrackPlayback():async; ]-^[Controller]
+[PeerRadioListenerController| +audioSource:AudioBufferSourceNode; +connection:RTCPeerConnection; | +reset(); +display(); +negotiatePeerConnection(sender:Object):async; +addPlaylistTrack(metadata:String); +startNextTrackPlayback(audioBuffer:ArrayBuffer):async; ]-^[Controller]
+[PeerRadioSenderController| +audioSource:AudioBufferSourceNode; +connections:RTCPeerConnection *; | +reset(); +display(); +negotiatePeerConnections():async; +startNextTrackPlayback():async; +removePlaylistTracks(files:File *); +addPlaylistTracks(files:File *); ]-^[Controller]

@@ -1,0 +1,30 @@
+// UML entity-relationship diagram for JPA persistence
+// Render using https://yuml.me/diagram/plain/class/draw
+[Comparable(Type)| +compareTo(other:Type):int; ]
+[Group| +_ADMIN:Group; +_USER:Group; | ]-.-^[Comparable(Type)]
+[NegotiationType| +_WEB_RTC:NegotiationType; | ]-.-^[Comparable(Type)]
+[Name| -family:char 1..31; -given:char 1..31; | ...]-.-^[Comparable(Type)]
+[Address| -street:char 0..63; -postcode:char 0..15; -city:char 1..63; | ...]-.-^[Comparable(Type)]
+
+[BaseEntity| -identity:long; -version:int; -creationTimestamp:long; -modificationTimestamp:long; | +getIdentity():long; ~setIdentity(:long); +getCreationTimestamp():long; ~setCreationTimestamp(:long); +getModificationTimestamp():long; ~setModificationTimestamp(:long); +toString():char 0..*; ...; ]-.-^[Comparable(Type)]
+[BaseEntity]-[note: toString(): return class-name + '@' + identity ]
+
+[Document| -hash:char 64..64; -type:char 1..63; -content:byte 1..16777215; | ...]-^[BaseEntity]
+
+[Person| -email:char 1..128; -passwordHash:char 64..64; | +getName():Name; ~setName(:Name); +getAddress():Address; ~setAddress(:Address); ...; ]-^[BaseEntity]
+[Person]++ - name>[Name]
+[Person]++ - address>[Address]
+[Person]++ - group>[Group]
+[Person]* - avatar 1>[Document]
+
+[Negotiation| -offer: char 0..2044; -answer: char 0..2044; | ...]-^[BaseEntity]
+[Negotiation]++ - type>[NegotiationType]
+[Negotiation]<* - negotiator 1>[Person]
+
+[Album| -title:char 0..127; -releaseYear:short; -trackCount:byte; | ...; ]-^[BaseEntity]
+[Album]* - cover 0..1>[Document]
+
+[Track| -name:char 1..127; -artist:char 1..127; -genre:char 1..31; -ordinal:byte; ]-^[BaseEntity]
+[Track]<* - owner 1>[Person]
+[Track]<* - album 1>[Album]
+[Track]* - recording 1>[Document]
