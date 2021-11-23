@@ -120,4 +120,8 @@ public class EntityService {
 
 		entityManager.getEntityManagerFactory().getCache().evict(BaseEntity.class, entityIdentity);
 	}
+	
+	public void filter() {
+		
+	}
 }

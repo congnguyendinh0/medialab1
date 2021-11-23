@@ -1,78 +1,85 @@
 package edu.sb.radio.persistence;
 
+import javax.json.bind.annotation.JsonbProperty;
+import javax.json.bind.annotation.JsonbTransient;
+import javax.json.bind.annotation.JsonbVisibility;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
-import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlType;
 
-@Entity(name = "Negotiation")
-@Table(name = "Negotiation", indexes = { @Index(name = "type", columnList = "type", unique = true),
+import edu.sb.radio.util.JsonProtectedPropertyStrategy;
+
+@Entity
+@Table(schema = "radio", name = "Negotiation", indexes = { 
+		@Index(name = "type", columnList = "type", unique = true),
 		@Index(name = "offer", columnList = "offer", unique = true),
-		@Index(name = "answer", columnList = "answer", unique = true) })
-@PrimaryKeyJoinColumn(name = "discriminator_id")
+		@Index(name = "answer", columnList = "answer", unique = true) 
+})
+@PrimaryKeyJoinColumn(name = "negotiationIdentity")
+@JsonbVisibility(JsonProtectedPropertyStrategy.class)
+@XmlType
+@XmlRootElement
 public class Negotiation extends BaseEntity {
-	public enum NegotiationType {
-		WEB_RTC
-	}
-
-	private int id;
-	private int personID;
-	private NegotiationType type;
-	private String offer;
-	private String answer;
-
-	protected Negotiation() {
-		this(1, NegotiationType.WEB_RTC, "pls help", null);
-	}
-
-	public Negotiation(int personID, NegotiationType type, String offer, String answer) {
-		this.personID = personID;
-		this.type = type;
-		this.offer = offer;
-		this.answer = answer;
-	}
-
-	@Id
-	@Column(name = "negotiationIdentity")
-	public int getId() {
-		return id;
-	}
-
-	public void setId(int id) {
-		this.id = id;
-	}
-
-	@ManyToOne
-	@JoinColumn(name = "negotiatorReference", referencedColumnName = "personIdentity", updatable = true)
-	public int getPersonID() {
-		return personID;
-	}
-
-	protected void setPersonID(int personID) {
-		this.personID = personID;
-	}
-
+	static public enum Type { WEB_RTC }
+	
+	@NotNull
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false, name = "type", updatable = true)
-	@Valid
-	public NegotiationType getType() {
+	private Type type;
+	
+	@NotNull
+	@Column(nullable = false, name = "offer", updatable = true, length = 2046)
+	@Size(max = 2044)
+	private String offer;
+	
+	@Column(nullable = true, name = "answer", updatable = true, length = 2046)
+	@Size(max = 2044)
+	private String answer;
+	
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "negotiatorReference", nullable = false, updatable = false, insertable = true)
+	private Person negotiator;
+
+	public Negotiation(Person negotiator) {
+		this.negotiator = negotiator;
+		this.type = Type.WEB_RTC;
+	}
+	
+	protected Negotiation() {
+		this(null);
+	}
+	
+	@JsonbTransient @XmlTransient
+	public Person getNegotiator() {
+		return negotiator;
+	}
+
+	protected void setNegotiator(Person negotiator) {
+		this.negotiator = negotiator;
+	}
+
+	@JsonbProperty @XmlAttribute
+	public Type getType() {
 		return type;
 	}
 
-	public void setType(NegotiationType type) {
+	public void setType(Type type) {
 		this.type = type;
 	}
 
-	@Column(nullable = false, name = "offer", updatable = true)
-	@Size(min = 0, max = 2046)
+	@JsonbProperty @XmlAttribute
 	public String getOffer() {
 		return offer;
 	}
@@ -81,8 +88,7 @@ public class Negotiation extends BaseEntity {
 		this.offer = offer;
 	}
 
-	@Column(nullable = true, name = "answer", updatable = true)
-	@Size(min = 0, max = 2046)
+	@JsonbProperty @XmlAttribute
 	public String getAnswer() {
 		return answer;
 	}

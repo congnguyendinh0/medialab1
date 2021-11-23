@@ -1,5 +1,8 @@
 package edu.sb.radio.persistence;
 
+import javax.json.bind.annotation.JsonbProperty;
+import javax.json.bind.annotation.JsonbTransient;
+import javax.json.bind.annotation.JsonbVisibility;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -7,40 +10,41 @@ import javax.persistence.Index;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlType;
 
 import edu.sb.radio.util.HashCodes;
+import edu.sb.radio.util.JsonProtectedPropertyStrategy;
 
-@Entity(name = "Document")
-@Table(name = "Document", indexes = { @Index(name = "type", columnList = "type", unique = true) })
-@PrimaryKeyJoinColumn(name = "discriminator_id")
+@Entity
+@Table(schema = "radio", name = "Document", indexes = { @Index(name = "type", columnList = "type", unique = true) })
+@PrimaryKeyJoinColumn(name = "documentIdentity")
+@JsonbVisibility(JsonProtectedPropertyStrategy.class)
+@XmlType @XmlRootElement
 public class Document extends BaseEntity {
-	private int id;
 	private String hash;
 	private String type;
 	private byte[] content;
 
 	protected Document() {
-		this(HashCodes.sha2HashText(256, "hash"), "some type", "some content".getBytes());
+		this(null);
 	}
 
-	public Document(String hash, String type, byte[] content) {
-		this.hash = hash;
-		this.type = type;
+	// good default for type (search later)
+	public Document(byte[] content) {
+		this.hash = HashCodes.sha2HashText(256, content);
+		
+		// TODO
+		this.type = "something";
+		
 		this.content = content;
-	}
-
-	@Id
-	@Column(name = "documentIdentity")
-	public int getId() {
-		return id;
-	}
-
-	public void setId(int id) {
-		this.id = id;
 	}
 
 	@Column(nullable = false, name = "hash", unique = true, updatable = true)
 	@Size(min = 64, max = 64)
+	@JsonbProperty @XmlAttribute
 	public String getHash() {
 		return hash;
 	}
@@ -51,6 +55,7 @@ public class Document extends BaseEntity {
 
 	@Column(nullable = false, name = "type", updatable = true)
 	@Size(min = 1, max = 63)
+	@JsonbProperty @XmlAttribute
 	public String getType() {
 		return type;
 	}
@@ -61,6 +66,7 @@ public class Document extends BaseEntity {
 
 	@Column(nullable = false, name = "content", updatable = true)
 	@Size(min = 1, max = 16777215)
+	@JsonbTransient @XmlTransient
 	public byte[] getContent() {
 		return content;
 	}
