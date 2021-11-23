@@ -1,5 +1,7 @@
 package edu.sb.radio.persistence;
 
+import javax.json.bind.annotation.JsonbProperty;
+import javax.json.bind.annotation.JsonbVisibility;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -9,81 +11,75 @@ import javax.persistence.ManyToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
-@Entity(name = "Track")
-@Table(name = "Track", indexes = { @Index(name = "artist", columnList = "artist", unique = true),
-		@Index(name = "genre", columnList = "genre", unique = true) })
-@PrimaryKeyJoinColumn(name = "discriminator_id")
+import edu.sb.radio.util.JsonProtectedPropertyStrategy;
+
+@Entity
+@Table(schema = "radio", name = "Track", indexes = { 
+		@Index(name = "artist", columnList = "artist", unique = false),
+		@Index(name = "genre", columnList = "genre", unique = false) 
+})
+@PrimaryKeyJoinColumn(name = "trackIdentity")
+@JsonbVisibility(JsonProtectedPropertyStrategy.class)
+@XmlType @XmlRootElement
 public class Track extends BaseEntity {
-	private int id;
-	private int albumID;
-	private int personID;
-	private int docuID;
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "ownerReference", nullable = false, updatable = false, insertable = true)
+	private Person owner;
+	
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "albumReference", nullable = false, updatable = false, insertable = true)
+	private Album album;
+	
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "recordingReference", nullable = false, updatable = false, insertable = true)
+	private Document recording;
+	
 	private String name;
 	private String artist;
 	private String genre;
 	private Integer ordinal;
 
-	public void setOrdinal(Integer ordinal) {
-		this.ordinal = ordinal;
-	}
-
 	protected Track() {
-		this(1, 1, 1, "some name", "some artist", "some genre", 1);
+		this(null, null, null);
 	}
 
-	public Track(int albumID, int personID, int docuID, String name, String artist, String genre, Integer ordinal) {
-		this.albumID = albumID;
-		this.personID = personID;
-		this.docuID = docuID;
-		this.name = name;
-		this.artist = artist;
-		this.genre = genre;
-		this.ordinal = ordinal;
+	public Track(Person owner, Album album, Document recording) {
+		this.owner = owner;
+		this.album = album;
+		this.recording = recording;
 	}
 
-	@Id
-	@Column(name = "trackIdentity")
-	public int getId() {
-		return id;
+	public Person getOwner() {
+		return owner;
 	}
 
-	public void setId(int id) {
-		this.id = id;
+	protected void setOwner(Person owner) {
+		this.owner = owner;
+	}
+	
+	public Album getAlbum() {
+		return album;
 	}
 
-	@ManyToOne
-	@JoinColumn(name = "albumReference", referencedColumnName = "albumIdentity", updatable = true)
-	public int getAlbumID() {
-		return albumID;
+	protected void setAlbum(Album album) {
+		this.album = album;
 	}
 
-	protected void setAlbumID(int albumID) {
-		this.albumID = albumID;
+	public Document getRecording() {
+		return recording;
 	}
 
-	@ManyToOne
-	@JoinColumn(name = "ownerReference", referencedColumnName = "personIdentity", updatable = true)
-	public int getPersonID() {
-		return personID;
-	}
-
-	protected void setPersonID(int personID) {
-		this.personID = personID;
-	}
-
-	@ManyToOne
-	@JoinColumn(name = "recordingReference", referencedColumnName = "documentIdentity", updatable = true)
-	public int getDocuID() {
-		return docuID;
-	}
-
-	protected void setDocuID(int docuID) {
-		this.docuID = docuID;
+	protected void setRecording(Document recording) {
+		this.recording = recording;
 	}
 
 	@Column(nullable = false, name = "name", updatable = true)
 	@Size(min = 1, max = 127)
+	@JsonbProperty @XmlAttribute
 	public String getName() {
 		return name;
 	}
@@ -94,6 +90,7 @@ public class Track extends BaseEntity {
 
 	@Column(nullable = false, name = "artist", updatable = true)
 	@Size(min = 1, max = 127)
+	@JsonbProperty @XmlAttribute
 	public String getArtist() {
 		return artist;
 	}
@@ -104,6 +101,7 @@ public class Track extends BaseEntity {
 
 	@Column(nullable = false, name = "genre", updatable = true)
 	@Size(min = 1, max = 31)
+	@JsonbProperty @XmlAttribute
 	public String getGenre() {
 		return genre;
 	}
@@ -113,7 +111,12 @@ public class Track extends BaseEntity {
 	}
 
 	@Column(nullable = false, name = "ordinal", updatable = true)
+	@JsonbProperty @XmlAttribute
 	public Integer getOrdinal() {
 		return ordinal;
+	}
+	
+	public void setOrdinal(Integer ordinal) {
+		this.ordinal = ordinal;
 	}
 }

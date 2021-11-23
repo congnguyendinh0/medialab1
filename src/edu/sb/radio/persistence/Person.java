@@ -1,7 +1,12 @@
 package edu.sb.radio.persistence;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
+import javax.json.bind.annotation.JsonbProperty;
+import javax.json.bind.annotation.JsonbTransient;
+import javax.json.bind.annotation.JsonbVisibility;
 import javax.persistence.AttributeOverride;
 import javax.persistence.AttributeOverrides;
 import javax.persistence.CascadeType;
@@ -11,6 +16,7 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -19,63 +25,57 @@ import javax.persistence.Table;
 import javax.validation.Valid;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Size;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlType;
 
 import edu.sb.radio.util.HashCodes;
+import edu.sb.radio.util.JsonProtectedPropertyStrategy;
 
-@Entity(name = "Person")
-@Table(name = "Person")
-@PrimaryKeyJoinColumn(name = "discriminator_id")
+@Entity
+@Table(schema = "radio", name = "Person", indexes = @Index(columnList = "email", unique = true))
+@PrimaryKeyJoinColumn(name = "personIdentity")
+@JsonbVisibility(JsonProtectedPropertyStrategy.class)
+@XmlType @XmlRootElement
 public class Person extends BaseEntity {
-	public enum Group {
-		ADMIN, USER
-	}
-
+	static public enum Group { ADMIN, USER }
+	static private final String DEFAULT_PASSWORD_HASH = HashCodes.sha2HashText(256, "password");
+	
 	// properties
-	private int id;
-	private Set<Negotiation> negotiations;
-	private Set<Track> tracks;
-	private int docuID;
+	@Column(nullable = false, name = "email", unique = true, updatable = true)
+	@Email
+	@Size(min = 1, max = 128)
 	private String email;
 	private String passwordHash;
 	private Group group;
 	private Name name;
 	private Address address;
+	private Set<String> phones;
+	
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "avatarReference", nullable = false, updatable = true)
+	private Document avatar;
+	private Set<Negotiation> negotiations;
+	private Set<Track> tracks;
 
-	// Constructor
-	protected Person() {
-		this(1, "test@gmail.com", HashCodes.sha2HashText(256, "password"), Group.USER, null, "Vu", "Huong", "street",
-				"plz", "city", "land");
+	// already corrected
+	public Person() {
+		this.passwordHash = DEFAULT_PASSWORD_HASH;
+		this.group = Group.USER;
+		this.name = new Name();
+		this.address = new Address();
+		this.phones = new HashSet<>();
+		this.negotiations = Collections.emptySet();
+		this.tracks = Collections.emptySet();
+	}
+	
+	public Document getAvatar() {
+		return avatar;
 	}
 
-	public Person(int docuID, String email, String passwordHash, Group group, String title, String surname,
-			String forename, String street, String postcode, String city, String land) {
-		this.docuID = docuID;
-		this.email = email;
-		this.passwordHash = passwordHash;
-		this.group = group;
-		this.name = new Name(title, surname, forename);
-		this.address = new Address(street, postcode, city, land);
-	}
-
-	// get set method
-	@Id
-	@Column(name = "personIdentity")
-	public int getId() {
-		return id;
-	}
-
-	public void setId(int id) {
-		this.id = id;
-	}
-
-	@ManyToOne
-	@JoinColumn(name = "avatarReference", referencedColumnName = "documentIdentity", updatable = true)
-	public int getDocuID() {
-		return docuID;
-	}
-
-	protected void setDocuID(int docuID) {
-		this.docuID = docuID;
+	protected void setAvatar(Document avatar) {
+		this.avatar = avatar;
 	}
 
 	@OneToMany(mappedBy = "personID", cascade = {CascadeType.REFRESH, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REMOVE})
@@ -98,9 +98,8 @@ public class Person extends BaseEntity {
 		this.tracks = tracks;
 	}
 
-	@Column(nullable = false, name = "email", unique = true, updatable = true)
-	@Email
-	@Size(min = 1, max = 128)
+	
+	@JsonbProperty @XmlAttribute
 	public String getEmail() {
 		return email;
 	}
@@ -111,6 +110,7 @@ public class Person extends BaseEntity {
 
 	@Column(nullable = false, name = "passwordHash", updatable = true)
 	@Size(min = 64, max = 64)
+	@JsonbTransient @XmlTransient
 	public String getPasswordHash() {
 		return passwordHash;
 	}

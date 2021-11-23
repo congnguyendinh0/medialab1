@@ -1,7 +1,10 @@
 package edu.sb.radio.persistence;
 
+import java.util.Collections;
 import java.util.Set;
 
+import javax.json.bind.annotation.JsonbProperty;
+import javax.json.bind.annotation.JsonbVisibility;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,52 +15,45 @@ import javax.persistence.OneToMany;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
-@Entity(name = "Album")
-@Table(name = "Album")
-@PrimaryKeyJoinColumn(name = "discriminator_id")
+import edu.sb.radio.util.JsonProtectedPropertyStrategy;
+
+@Entity
+@Table(schema = "radio", name = "Album")
+@PrimaryKeyJoinColumn(name = "albumIdentity")
+@JsonbVisibility(JsonProtectedPropertyStrategy.class)
+@XmlType @XmlRootElement
 public class Album extends BaseEntity {
-	private int id;
-	private int docuID;
-	private Set<Track> tracks;
 	private String title;
 	private Integer releaseYear;
 	private Integer trackCount;
-
-	protected Album() {
-		this(1, "some title", 2021, 12);
+	
+	@ManyToOne(optional = true)
+	@JoinColumn(name = "coverReference", nullable = true, updatable = true)
+	private Document cover;
+	
+	@NotNull
+	@OneToMany(mappedBy = "album", orphanRemoval = false, cascade = { CascadeType.REMOVE, CascadeType.REFRESH, CascadeType.MERGE, CascadeType.DETACH })
+	private Set<Track> tracks;
+	
+	public Album() {
+		this.tracks = Collections.emptySet();
 	}
 
-	public Album(int docuID, String title, Integer releaseYear, Integer trackCount) {
-		this.docuID = docuID;
-		this.title = title;
-		this.releaseYear = releaseYear;
-		this.trackCount = trackCount;
+	public Document getCover() {
+		return cover;
 	}
 
-	@Id
-	@Column(name = "albumIdentity")
-	public int getId() {
-		return id;
+	protected void setCover(Document cover) {
+		this.cover = cover;
 	}
 
-	public void setId(int id) {
-		this.id = id;
-	}
-
-	@ManyToOne
-	@JoinColumn(name = "coverReference", referencedColumnName = "documentIdentity", updatable = true)
-	public int getDocuID() {
-		return docuID;
-	}
-
-	protected void setDocuID(int docuID) {
-		this.docuID = docuID;
-	}
-
-	@OneToMany(mappedBy = "albumID", cascade = {CascadeType.REFRESH, CascadeType.MERGE, CascadeType.DETACH})
-	@Valid
+	
 	public Set<Track> getTracks() {
 		return tracks;
 	}
@@ -68,6 +64,7 @@ public class Album extends BaseEntity {
 
 	@Column(nullable = false, name = "title", updatable = true)
 	@Size(min = 0, max = 127)
+	@JsonbProperty @XmlAttribute
 	public String getTitle() {
 		return title;
 	}
@@ -77,6 +74,7 @@ public class Album extends BaseEntity {
 	}
 
 	@Column(nullable = false, name = "releaseYear", updatable = true)
+	@JsonbProperty @XmlAttribute
 	public Integer getReleaseYear() {
 		return releaseYear;
 	}
@@ -86,6 +84,7 @@ public class Album extends BaseEntity {
 	}
 
 	@Column(nullable = false, name = "trackCount", updatable = true)
+	@JsonbProperty @XmlAttribute
 	public Integer getTrackCount() {
 		return trackCount;
 	}

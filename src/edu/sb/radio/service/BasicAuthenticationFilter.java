@@ -17,7 +17,7 @@ import edu.sb.radio.util.Copyright;
 // @Provider
 // @Priority(Priorities.AUTHENTICATION)
 @Copyright(year = 2017, holders = "Sascha Baumeister")
-public class BasicAuthenticationFilterSkeleton implements ContainerRequestFilter {
+public class BasicAuthenticationFilter implements ContainerRequestFilter {
 
 	/**
 	 * HTTP request header for the authenticated requester's identity.
