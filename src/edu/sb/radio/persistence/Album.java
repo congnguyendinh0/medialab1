@@ -30,8 +30,8 @@ import edu.sb.radio.util.JsonProtectedPropertyStrategy;
 @XmlType @XmlRootElement
 public class Album extends BaseEntity {
 	private String title;
-	private Integer releaseYear;
-	private Integer trackCount;
+	private short releaseYear;
+	private byte trackCount;
 	
 	@ManyToOne(optional = true)
 	@JoinColumn(name = "coverReference", nullable = true, updatable = true)
@@ -75,21 +75,21 @@ public class Album extends BaseEntity {
 
 	@Column(nullable = false, name = "releaseYear", updatable = true)
 	@JsonbProperty @XmlAttribute
-	public Integer getReleaseYear() {
+	public short getReleaseYear() {
 		return releaseYear;
 	}
 
-	public void setReleaseYear(Integer releaseYear) {
+	public void setReleaseYear(short releaseYear) {
 		this.releaseYear = releaseYear;
 	}
 
 	@Column(nullable = false, name = "trackCount", updatable = true)
 	@JsonbProperty @XmlAttribute
-	public Integer getTrackCount() {
+	public byte getTrackCount() {
 		return trackCount;
 	}
 
-	public void setTrackCount(Integer trackCount) {
+	public void setTrackCount(byte trackCount) {
 		this.trackCount = trackCount;
 	}
 }

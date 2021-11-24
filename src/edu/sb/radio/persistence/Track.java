@@ -41,7 +41,7 @@ public class Track extends BaseEntity {
 	private String name;
 	private String artist;
 	private String genre;
-	private Integer ordinal;
+	private short ordinal;
 
 	protected Track() {
 		this(null, null, null);
