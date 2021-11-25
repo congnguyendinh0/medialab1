@@ -29,8 +29,7 @@ import edu.sb.radio.util.JsonProtectedPropertyStrategy;
 })
 @PrimaryKeyJoinColumn(name = "negotiationIdentity")
 @JsonbVisibility(JsonProtectedPropertyStrategy.class)
-@XmlType
-@XmlRootElement
+@XmlType @XmlRootElement
 public class Negotiation extends BaseEntity {
 	static public enum Type { WEB_RTC }
 	
@@ -40,12 +39,12 @@ public class Negotiation extends BaseEntity {
 	private Type type;
 	
 	@NotNull
-	@Column(nullable = false, name = "offer", updatable = true, length = 2046)
 	@Size(max = 2044)
+	@Column(nullable = false, name = "offer", updatable = true, length = 2046)
 	private String offer;
 	
-	@Column(nullable = true, name = "answer", updatable = true, length = 2046)
 	@Size(max = 2044)
+	@Column(nullable = true, name = "answer", updatable = true, length = 2046)
 	private String answer;
 	
 	@ManyToOne(optional = false)

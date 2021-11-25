@@ -7,15 +7,12 @@ import java.util.Set;
 import javax.json.bind.annotation.JsonbProperty;
 import javax.json.bind.annotation.JsonbTransient;
 import javax.json.bind.annotation.JsonbVisibility;
-import javax.persistence.AttributeOverride;
-import javax.persistence.AttributeOverrides;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -41,25 +38,43 @@ import edu.sb.radio.util.JsonProtectedPropertyStrategy;
 public class Person extends BaseEntity {
 	static public enum Group { ADMIN, USER }
 	static private final String DEFAULT_PASSWORD_HASH = HashCodes.sha2HashText(256, "password");
+
+	@Size(min = 64, max = 64)
+	@Column(nullable = false, name = "passwordHash", updatable = true)
+	private String passwordHash;
 	
-	// properties
-	@Column(nullable = false, name = "email", unique = true, updatable = true)
+	@Valid
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false, name = "groupAlias", updatable = true)
+	private Group group;
+	
+	@Embedded
+	@Valid
+	private Name name;
+	
+	@Embedded
+	@Valid
+	private Address address;
+	
+	private Set<String> phones;
+	
 	@Email
 	@Size(min = 1, max = 128)
+	@Column(nullable = false, name = "email", unique = true, updatable = true)
 	private String email;
-	private String passwordHash;
-	private Group group;
-	private Name name;
-	private Address address;
-	private Set<String> phones;
+	
+	@OneToMany(mappedBy = "negotiator", orphanRemoval = false, cascade = { CascadeType.REFRESH, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REMOVE })
+	@Valid
+	private Set<Negotiation> negotiations;
+	
+	@OneToMany(mappedBy = "owner", orphanRemoval = false, cascade = { CascadeType.REFRESH, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REMOVE })
+	@Valid
+	private Set<Track> tracks;
 	
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "avatarReference", nullable = false, updatable = true)
 	private Document avatar;
-	private Set<Negotiation> negotiations;
-	private Set<Track> tracks;
-
-	// already corrected
+	
 	public Person() {
 		this.passwordHash = DEFAULT_PASSWORD_HASH;
 		this.group = Group.USER;
@@ -69,17 +84,8 @@ public class Person extends BaseEntity {
 		this.negotiations = Collections.emptySet();
 		this.tracks = Collections.emptySet();
 	}
-	
-	public Document getAvatar() {
-		return avatar;
-	}
 
-	protected void setAvatar(Document avatar) {
-		this.avatar = avatar;
-	}
-
-	@OneToMany(mappedBy = "personID", cascade = {CascadeType.REFRESH, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REMOVE})
-	@Valid
+	@JsonbTransient @XmlTransient
 	public Set<Negotiation> getNegotiations() {
 		return negotiations;
 	}
@@ -88,8 +94,7 @@ public class Person extends BaseEntity {
 		this.negotiations = negotiations;
 	}
 
-	@OneToMany(mappedBy = "personID", cascade = {CascadeType.REFRESH, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REMOVE})
-	@Valid
+	@JsonbTransient @XmlTransient
 	public Set<Track> getTracks() {
 		return tracks;
 	}
@@ -97,8 +102,25 @@ public class Person extends BaseEntity {
 	protected void setTracks(Set<Track> tracks) {
 		this.tracks = tracks;
 	}
-
 	
+	@JsonbTransient @XmlTransient
+	public Document getAvatar() {
+		return avatar;
+	}
+
+	protected void setAvatar(Document avatar) {
+		this.avatar = avatar;
+	}
+	
+	@JsonbTransient @XmlTransient
+	public Set<String> getPhones() {
+		return phones;
+	}
+
+	protected void setPhones(Set<String> phones) {
+		this.phones = phones;
+	}
+
 	@JsonbProperty @XmlAttribute
 	public String getEmail() {
 		return email;
@@ -108,8 +130,6 @@ public class Person extends BaseEntity {
 		this.email = email;
 	}
 
-	@Column(nullable = false, name = "passwordHash", updatable = true)
-	@Size(min = 64, max = 64)
 	@JsonbTransient @XmlTransient
 	public String getPasswordHash() {
 		return passwordHash;
@@ -119,9 +139,7 @@ public class Person extends BaseEntity {
 		this.passwordHash = passwordHash;
 	}
 
-	@Enumerated(EnumType.STRING)
-	@Column(nullable = false, name = "groupAlias", updatable = true)
-	@Valid
+	@JsonbProperty @XmlAttribute
 	public Group getGroup() {
 		return group;
 	}
@@ -130,12 +148,7 @@ public class Person extends BaseEntity {
 		this.group = group;
 	}
 
-	@Embedded
-	@AttributeOverrides({
-			@AttributeOverride(name = "title", column = @Column(nullable = true, length = 15, name = "title", updatable = true)),
-			@AttributeOverride(name = "surname", column = @Column(nullable = false, length = 31, name = "surname", updatable = true)),
-			@AttributeOverride(name = "forename", column = @Column(nullable = false, length = 31, name = "forename", updatable = true)) })
-	@Valid
+	@JsonbProperty @XmlAttribute
 	public Name getName() {
 		return name;
 	}
@@ -144,13 +157,7 @@ public class Person extends BaseEntity {
 		this.name = name;
 	}
 
-	@Embedded
-	@AttributeOverrides({
-			@AttributeOverride(name = "street", column = @Column(nullable = false, length = 63, name = "street", updatable = true)),
-			@AttributeOverride(name = "postcode", column = @Column(nullable = false, length = 15, name = "postcode", updatable = true)),
-			@AttributeOverride(name = "city", column = @Column(nullable = false, length = 63, name = "city", updatable = true)),
-			@AttributeOverride(name = "country", column = @Column(nullable = false, length = 63, name = "country", updatable = true)) })
-	@Valid
+	@JsonbProperty @XmlAttribute
 	public Address getAddress() {
 		return address;
 	}

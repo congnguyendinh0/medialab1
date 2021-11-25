@@ -1,10 +1,10 @@
 package edu.sb.radio.persistence;
 
 import javax.json.bind.annotation.JsonbProperty;
+import javax.json.bind.annotation.JsonbTransient;
 import javax.json.bind.annotation.JsonbVisibility;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Id;
 import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -13,6 +13,7 @@ import javax.persistence.Table;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 import edu.sb.radio.util.JsonProtectedPropertyStrategy;
@@ -38,9 +39,19 @@ public class Track extends BaseEntity {
 	@JoinColumn(name = "recordingReference", nullable = false, updatable = false, insertable = true)
 	private Document recording;
 	
+	@Column(nullable = false, name = "name", updatable = true)
+	@Size(min = 1, max = 127)
 	private String name;
+	
+	@Column(nullable = false, name = "artist", updatable = true)
+	@Size(min = 1, max = 127)
 	private String artist;
+	
+	@Column(nullable = false, name = "genre", updatable = true)
+	@Size(min = 1, max = 31)
 	private String genre;
+	
+	@Column(nullable = false, name = "ordinal", updatable = true)
 	private Integer ordinal;
 
 	protected Track() {
@@ -53,6 +64,7 @@ public class Track extends BaseEntity {
 		this.recording = recording;
 	}
 
+	@JsonbTransient @XmlTransient
 	public Person getOwner() {
 		return owner;
 	}
@@ -61,6 +73,7 @@ public class Track extends BaseEntity {
 		this.owner = owner;
 	}
 	
+	@JsonbTransient @XmlTransient
 	public Album getAlbum() {
 		return album;
 	}
@@ -69,6 +82,7 @@ public class Track extends BaseEntity {
 		this.album = album;
 	}
 
+	@JsonbTransient @XmlTransient
 	public Document getRecording() {
 		return recording;
 	}
@@ -77,8 +91,6 @@ public class Track extends BaseEntity {
 		this.recording = recording;
 	}
 
-	@Column(nullable = false, name = "name", updatable = true)
-	@Size(min = 1, max = 127)
 	@JsonbProperty @XmlAttribute
 	public String getName() {
 		return name;
@@ -87,9 +99,7 @@ public class Track extends BaseEntity {
 	public void setName(String name) {
 		this.name = name;
 	}
-
-	@Column(nullable = false, name = "artist", updatable = true)
-	@Size(min = 1, max = 127)
+	
 	@JsonbProperty @XmlAttribute
 	public String getArtist() {
 		return artist;
@@ -99,8 +109,6 @@ public class Track extends BaseEntity {
 		this.artist = artist;
 	}
 
-	@Column(nullable = false, name = "genre", updatable = true)
-	@Size(min = 1, max = 31)
 	@JsonbProperty @XmlAttribute
 	public String getGenre() {
 		return genre;
@@ -109,8 +117,7 @@ public class Track extends BaseEntity {
 	public void setGenre(String genre) {
 		this.genre = genre;
 	}
-
-	@Column(nullable = false, name = "ordinal", updatable = true)
+	
 	@JsonbProperty @XmlAttribute
 	public Integer getOrdinal() {
 		return ordinal;

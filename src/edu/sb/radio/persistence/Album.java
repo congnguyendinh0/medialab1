@@ -4,11 +4,11 @@ import java.util.Collections;
 import java.util.Set;
 
 import javax.json.bind.annotation.JsonbProperty;
+import javax.json.bind.annotation.JsonbTransient;
 import javax.json.bind.annotation.JsonbVisibility;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
@@ -19,6 +19,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 
 import edu.sb.radio.util.JsonProtectedPropertyStrategy;
@@ -29,8 +30,14 @@ import edu.sb.radio.util.JsonProtectedPropertyStrategy;
 @JsonbVisibility(JsonProtectedPropertyStrategy.class)
 @XmlType @XmlRootElement
 public class Album extends BaseEntity {
+	@Size(max = 127)
+	@Column(nullable = false, name = "title", updatable = true, length = 129)
 	private String title;
+	
+	@Column(nullable = false, name = "releaseYear", updatable = true)
 	private Integer releaseYear;
+	
+	@Column(nullable = false, name = "trackCount", updatable = true)
 	private Integer trackCount;
 	
 	@ManyToOne(optional = true)
@@ -39,12 +46,14 @@ public class Album extends BaseEntity {
 	
 	@NotNull
 	@OneToMany(mappedBy = "album", orphanRemoval = false, cascade = { CascadeType.REMOVE, CascadeType.REFRESH, CascadeType.MERGE, CascadeType.DETACH })
+	@Valid
 	private Set<Track> tracks;
 	
 	public Album() {
 		this.tracks = Collections.emptySet();
 	}
 
+	@JsonbTransient @XmlTransient
 	public Document getCover() {
 		return cover;
 	}
@@ -53,7 +62,7 @@ public class Album extends BaseEntity {
 		this.cover = cover;
 	}
 
-	
+	@JsonbTransient @XmlTransient
 	public Set<Track> getTracks() {
 		return tracks;
 	}
@@ -62,8 +71,6 @@ public class Album extends BaseEntity {
 		this.tracks = tracks;
 	}
 
-	@Column(nullable = false, name = "title", updatable = true)
-	@Size(min = 0, max = 127)
 	@JsonbProperty @XmlAttribute
 	public String getTitle() {
 		return title;
@@ -73,7 +80,6 @@ public class Album extends BaseEntity {
 		this.title = title;
 	}
 
-	@Column(nullable = false, name = "releaseYear", updatable = true)
 	@JsonbProperty @XmlAttribute
 	public Integer getReleaseYear() {
 		return releaseYear;
@@ -83,7 +89,6 @@ public class Album extends BaseEntity {
 		this.releaseYear = releaseYear;
 	}
 
-	@Column(nullable = false, name = "trackCount", updatable = true)
 	@JsonbProperty @XmlAttribute
 	public Integer getTrackCount() {
 		return trackCount;
