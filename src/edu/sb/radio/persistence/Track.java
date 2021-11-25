@@ -26,7 +26,7 @@ import edu.sb.radio.util.JsonProtectedPropertyStrategy;
 @PrimaryKeyJoinColumn(name = "trackIdentity")
 @JsonbVisibility(JsonProtectedPropertyStrategy.class)
 @XmlType @XmlRootElement
-public class Track extends BaseEntity {
+public abstract class Track extends BaseEntity {
 	@ManyToOne(optional = false)
 	@JoinColumn(name = "ownerReference", nullable = false, updatable = false, insertable = true)
 	private Person owner;
@@ -126,4 +126,17 @@ public class Track extends BaseEntity {
 	public void setOrdinal(Integer ordinal) {
 		this.ordinal = ordinal;
 	}
+	
+	
+	/**
+	 * Aufgabe 2
+	 */
+	@JsonbProperty @XmlAttribute
+	protected abstract Long getAlbumReference();
+	
+	@JsonbProperty @XmlAttribute
+	protected abstract Long getOwnerReference();
+	
+	@JsonbProperty @XmlAttribute
+	protected abstract Long getRecordingReference();
 }

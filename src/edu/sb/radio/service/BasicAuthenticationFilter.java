@@ -2,11 +2,23 @@ package edu.sb.radio.service;
 
 import static javax.ws.rs.core.HttpHeaders.WWW_AUTHENTICATE;
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
+
+import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+
+import edu.sb.radio.persistence.Person;
 import edu.sb.radio.util.Copyright;
+import edu.sb.radio.util.HashCodes;
+import edu.sb.radio.util.HttpCredentials.Basic;
+import edu.sb.radio.util.RestCredentials;
+import edu.sb.radio.util.RestJpaLifecycleProvider;
 
 
 /**
@@ -56,6 +68,28 @@ public class BasicAuthenticationFilter implements ContainerRequestFilter {
 		//   to provide HTTP Basic credentials (i.e. status code 401, and "WWW-Authenticate" header value "Basic").
 		//   Note that the alternative of throwing NotAuthorizedException("Basic") comes with the disadvantage that
 		//   failed authentication attempts clutter the server log with stack traces.
+		if(requestContext.getHeaderString(REQUESTER_IDENTITY) != null) throw new ClientErrorException(Status.BAD_REQUEST);
+		
+		String headerAuthorization = requestContext.getHeaderString("Authorization");
+		String textCredentials = headerAuthorization != "" ? headerAuthorization : null;
+		requestContext.getHeaders().remove(headerAuthorization);
+		
+		if (textCredentials != null) {
+			Basic parseTextCredentials = RestCredentials.newBasicInstance(textCredentials);
+			EntityManager entityManager = RestJpaLifecycleProvider.entityManager("radio");
+			List<Person> persons = entityManager
+					.createQuery("select p from Person as p where p.email = :email")
+					.setParameter("email", parseTextCredentials.getName())
+			        .getResultList();
+			if(persons.size() == 1) {
+				String passwordHash = HashCodes.sha2HashText(256, parseTextCredentials.getPassword());
+				
+				if(passwordHash == persons.get(0).getPasswordHash()) {
+					requestContext.getHeaders().add("Requester-Identity", String.valueOf(persons.get(0).getIdentity()));
+				} 
+			} 
+		}
+		
 		requestContext.abortWith(Response.status(UNAUTHORIZED).header(WWW_AUTHENTICATE, "Basic").build());
 	}
 }

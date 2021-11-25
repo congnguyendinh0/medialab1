@@ -35,7 +35,7 @@ import edu.sb.radio.util.JsonProtectedPropertyStrategy;
 @PrimaryKeyJoinColumn(name = "personIdentity")
 @JsonbVisibility(JsonProtectedPropertyStrategy.class)
 @XmlType @XmlRootElement
-public class Person extends BaseEntity {
+public abstract class Person extends BaseEntity {
 	static public enum Group { ADMIN, USER }
 	static private final String DEFAULT_PASSWORD_HASH = HashCodes.sha2HashText(256, "password");
 
@@ -165,4 +165,13 @@ public class Person extends BaseEntity {
 	public void setAddress(Address address) {
 		this.address = address;
 	}
+	
+	/**
+	 * Aufgabe 2
+	 */
+	@JsonbProperty @XmlAttribute
+	protected abstract Long getAvatarReference();
+	
+	@JsonbProperty @XmlAttribute
+	protected abstract long[] getTrackReferences();
 }
