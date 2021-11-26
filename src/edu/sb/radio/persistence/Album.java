@@ -29,7 +29,7 @@ import edu.sb.radio.util.JsonProtectedPropertyStrategy;
 @PrimaryKeyJoinColumn(name = "albumIdentity")
 @JsonbVisibility(JsonProtectedPropertyStrategy.class)
 @XmlType @XmlRootElement
-public abstract class Album extends BaseEntity {
+public class Album extends BaseEntity {
 	@Size(max = 127)
 	@Column(nullable = false, name = "title", updatable = true, length = 129)
 	private String title;
@@ -49,8 +49,9 @@ public abstract class Album extends BaseEntity {
 	@Valid
 	private Set<Track> tracks;
 	
-	public Album() {
+	public Album(Document cover) {
 		this.tracks = Collections.emptySet();
+		this.cover = cover;
 	}
 
 	@JsonbTransient @XmlTransient
@@ -101,9 +102,9 @@ public abstract class Album extends BaseEntity {
 	/**
 	 * Aufgabe 2
 	 */
-	@JsonbProperty @XmlAttribute
-	protected abstract Long getCoverReference();
-	
-	@JsonbProperty @XmlAttribute
-	protected abstract long[] getTrackReferences();
+//	@JsonbProperty @XmlAttribute
+//	protected abstract Long getCoverReference();
+//	
+//	@JsonbProperty @XmlAttribute
+//	protected abstract long[] getTrackReferences();
 }
