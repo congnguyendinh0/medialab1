@@ -1,0 +1,169 @@
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="author" content="Sascha Baumeister" />
+		<meta name="dcterms.rightsHolder" content="Sascha Baumeister" />
+		<meta name="dcterms.rights" content="all rights reserved" />
+		<meta name="dcterms.dateCopyrighted" content="2019" />
+
+		<title>Web-Radio</title>
+		<link rel="stylesheet" type="text/css" href="radio.css" />
+		<link rel="icon" type="image/png" href="radio.png"/>
+
+		<script type="module" src="js/welcome-controller.js"></script>
+		<script type="module" src="js/preferences-controller.js"></script>
+		<script type="module" src="js/server-radio-controller.js"></script>
+		<script type="module" src="js/peer-radio-sender-controller.js"></script>
+		<script type="module" src="js/peer-radio-listener-controller.js"></script>
+
+		<template id="welcome-template">
+			<section class="welcome">
+				<fieldset>
+					<legend>Login</legend>
+					<div>
+						<label class="horizontal">Email</label>
+						<input type="email" name="email" required="required" maxlength="128" />
+					</div>
+					<div>
+						<label class="horizontal">Password</label>
+						<input type="password" name="password" required="required" maxlength="16" />
+					</div>
+				</fieldset>
+				<button type="button" title="perform authentication">login</button>
+			</section>
+		</template>
+
+		<template id="preferences-template">
+			<section class="preferences">
+				<fieldset>
+					<legend>Avatar</legend>
+					<div>
+						<label class="horizontal">Drop image to change</label>
+						<img ondragover="event.preventDefault()" ondrop="event.preventDefault()" />
+					</div>
+				</fieldset>
+				<fieldset>
+					<legend>Account</legend>
+					<div>
+						<label class="horizontal">Email</label>
+						<input type="email" required="required" maxlength="127" />
+					</div>
+					<div>
+						<label class="horizontal">Password</label>
+						<input type="password" maxlength="16" />
+					</div>
+					<div>
+						<label class="horizontal">Forename</label>
+						<input type="text" required="required" maxlength="31" />
+					</div>
+					<div>
+						<label class="horizontal">Surname</label>
+						<input type="text" required="required" maxlength="31" />
+					</div>
+					<div>
+						<label class="horizontal">Group</label>
+						<input type="text" required="required" maxlength="5" />
+					</div>
+				</fieldset>
+				<fieldset>
+					<legend>Address</legend>
+					<div>
+						<label class="horizontal">Street</label>
+						<input type="text" required="required" maxlength="63" />
+					</div>
+					<div>
+						<label class="horizontal">ZIP</label>
+						<input type="text" required="required" maxlength="15" />
+					</div>
+					<div>
+						<label class="horizontal">City</label>
+						<input type="text" required="required" maxlength="63" />
+					</div>
+				</fieldset>
+				<button type="button" title="flush account and address changes">send</button>
+			</section>
+		</template>
+
+		<template id="server-radio-template">
+			<section class="server-radio">
+				<h1>Select genres and/or artists</h1>
+				<div>
+					<select multiple="multiple" size="6"></select>
+					<select multiple="multiple" size="6"></select>
+				</div>
+				<div>
+					<button type="button" title="add matching tracks to playlist">add</button>
+					<input type="range" min="5" max="15" step="0.125" value="10" title="crossfade duration in seconds [5,15]" />
+					<input type="range" min="0" max="1" step="0.0125" value="0.5" title="volume percentage [0,100]" />
+				</div>
+				<div>
+					<h1>Playlist</h1>
+					<table></table>
+				</div>
+				<div>
+					<h1>Lyrics</h1>
+					<div></div>
+				</div>
+			</section>
+		</template>
+
+		<template id="server-radio-playlist-entry-template">
+			<tr>
+				<td><img /></td>
+				<td><output></output></td>
+				<td><output></output></td>
+			</tr>
+		</template>
+
+		<template id="peer-radio-sender-template">
+			<section class="peer-radio-sender">
+				<h1>Playlist</h1>
+				<div>
+					<select multiple></select>
+				</div>
+				<div>
+					<input type="file" accept="audio/*" style="display:none" multiple />
+					<button type="button" title="add files to playlist">add...</button>
+					<button type="button" title="remove selected files from playlist">remove</button>
+					<input type="range" min="0" max="1" step="0.0125" value="0.5" title="volume percentage [0,100]" />
+				</div>
+			</section>
+		</template>
+
+		<template id="peer-radio-listener-template">
+			<section class="peer-radio-listener">
+				<h1>Select DJ</h1>
+				<div>
+					<span class="avatar slider"></span>
+				</div>
+				<div>
+					<input type="range" min="0" max="1" step="0.0125" value="0.5" title="volume percentage [0,100]" />
+				</div>
+				<h1>Playlist</h1>
+				<div>
+					<select multiple></select>
+				</div>
+			</section>
+		</template>
+	</head>
+
+
+	<body>
+		<header>
+			<nav class="horizontal">
+				<ul>
+					<li><a>Login</a></li>
+					<li><a>Preferences</a></li>
+					<li><a>Server Radio</a></li>
+					<li><a>Peer Radio</a></li>
+					<li><a>Peer DJ</a></li>
+				</ul>
+			</nav>
+		</header>
+		<main></main>
+		<footer>
+			<output></output>
+		</footer>
+	</body>
+</html>

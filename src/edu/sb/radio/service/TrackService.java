@@ -15,7 +15,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.core.Response;
 
 import edu.sb.radio.persistence.Album;
 import edu.sb.radio.persistence.Document;
@@ -37,9 +36,9 @@ public class TrackService {
 	}
 
 	@POST
+	@Path("/")
 	@Consumes("application/json")
 	@Produces("text/plain")
-	@Path("/")
 	public Track addTrack(
 			ContainerRequestContext requestContext, 
 			@FormParam("id") long id,
@@ -72,8 +71,8 @@ public class TrackService {
 	}
 
 	@GET
-	@Produces("application/json")
 	@Path("/genres")
+	@Produces("application/json")
 	public List<String> getTrackGenres() {
 		List<String> genres = entityManager.createQuery("select genre from Track t group by t.genre order by t.genre")
 				.getResultList();
@@ -81,8 +80,8 @@ public class TrackService {
 	}
 
 	@GET
-	@Produces("application/json")
 	@Path("/artists")
+	@Produces("application/json")
 	public List<String> getTrackArtists() {
 		List<String> artists = entityManager
 				.createQuery("select artist from Track t group by t.artist order by t.artist").getResultList();

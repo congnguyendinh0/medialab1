@@ -51,9 +51,9 @@ public class AlbumService {
     }
 	
 	@POST
+	@Path("/")  
 	@Consumes("application/json")
 	@Produces("text/plain")
-    @Path("/")  
     public Album addAlbum(
     		ContainerRequestContext requestContext,
     		@FormParam("id") long id,
