@@ -2,11 +2,23 @@ package edu.sb.radio.service;
 
 import static javax.ws.rs.core.HttpHeaders.WWW_AUTHENTICATE;
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
+
+import java.util.List;
+
+import javax.persistence.EntityManager;
+import javax.persistence.Query;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+
+import edu.sb.radio.persistence.Person;
 import edu.sb.radio.util.Copyright;
+import edu.sb.radio.util.HashCodes;
+import edu.sb.radio.util.HttpCredentials.Basic;
+import edu.sb.radio.util.RestCredentials;
+import edu.sb.radio.util.RestJpaLifecycleProvider;
 
 
 /**
@@ -22,7 +34,7 @@ public class BasicAuthenticationFilter implements ContainerRequestFilter {
 	/**
 	 * HTTP request header for the authenticated requester's identity.
 	 */
-	static public final String REQUESTER_IDENTITY = "Requester-Identity";
+	static public final String REQUESTER_IDENTITY = "X-Requester-Identity";
 
 
 	/**
@@ -56,6 +68,28 @@ public class BasicAuthenticationFilter implements ContainerRequestFilter {
 		//   to provide HTTP Basic credentials (i.e. status code 401, and "WWW-Authenticate" header value "Basic").
 		//   Note that the alternative of throwing NotAuthorizedException("Basic") comes with the disadvantage that
 		//   failed authentication attempts clutter the server log with stack traces.
+		if(requestContext.getHeaderString(REQUESTER_IDENTITY) != null) throw new ClientErrorException(Status.BAD_REQUEST);
+		
+		final List<String> authenticationHeaders = requestContext.getHeaders().remove("Authorization");
+		final String textCredentials = authenticationHeaders == null || authenticationHeaders.isEmpty() ? null : authenticationHeaders.get(0);
+		
+		if (textCredentials != null) {
+			final Basic credentials = RestCredentials.newBasicInstance(textCredentials);
+			final EntityManager entityManager = RestJpaLifecycleProvider.entityManager("radio");
+			final List<Person> people = entityManager
+					.createQuery("select p from Person as p where p.email = :email", Person.class)
+					.setParameter("email", credentials.getName())
+			        .getResultList();
+			if(people.size() == 1) {
+				final String passwordHash = HashCodes.sha2HashText(256, credentials.getPassword());
+				
+				if(passwordHash == people.get(0).getPasswordHash()) {
+					requestContext.getHeaders().add(REQUESTER_IDENTITY, String.valueOf(people.get(0).getIdentity()));
+					return;
+				}
+			} 
+		}
+		
 		requestContext.abortWith(Response.status(UNAUTHORIZED).header(WWW_AUTHENTICATE, "Basic").build());
 	}
 }

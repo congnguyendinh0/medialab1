@@ -16,8 +16,7 @@ import edu.sb.radio.util.JsonProtectedPropertyStrategy;
 
 @Embeddable
 @JsonbVisibility(JsonProtectedPropertyStrategy.class)
-@XmlType
-@XmlRootElement
+@XmlType @XmlRootElement
 public class Name implements Comparable<Name> {
 	static private final Comparator<Name> COMPARATOR = Comparator
 			.comparing(Name::getTitle, Comparator.nullsLast(Comparator.naturalOrder()))
