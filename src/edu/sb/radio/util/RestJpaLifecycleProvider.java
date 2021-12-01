@@ -33,8 +33,8 @@ import javax.ws.rs.ext.Provider;
  * Note that the use of a thread local variable for entity manager injection is based on the precondition that any HTTP request
  * is processed within a single thread. This assumption does hold in standard compatible environments, like Jersey.
  */
-//@Provider
-//@Priority(100)
+@Provider
+@Priority(100)
 @Copyright(year = 2013, holders = "Sascha Baumeister")
 public class RestJpaLifecycleProvider implements ContainerRequestFilter, ContainerResponseFilter {
 	static private final Map<String,RestJpaLifecycleProvider> INSTANCES = Collections.synchronizedMap(new HashMap<>());

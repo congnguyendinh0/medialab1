@@ -16,6 +16,7 @@ import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -30,15 +31,16 @@ import edu.sb.radio.util.JsonProtectedPropertyStrategy;
 @JsonbVisibility(JsonProtectedPropertyStrategy.class)
 @XmlType @XmlRootElement
 public class Album extends BaseEntity {
-	@Size(max = 127)
-	@Column(nullable = false, name = "title", updatable = true, length = 129)
+	@Column(nullable = false, updatable = true, length = 127)
+	@NotNull @Size(max = 127)
 	private String title;
 	
-	@Column(nullable = false, name = "releaseYear", updatable = true)
-	private Integer releaseYear;
+	@Column(nullable = false, updatable = true)
+	private short releaseYear;
 	
-	@Column(nullable = false, name = "trackCount", updatable = true)
-	private Integer trackCount;
+	@Positive
+	@Column(nullable = false, updatable = true)
+	private byte trackCount;
 	
 	@ManyToOne(optional = true)
 	@JoinColumn(name = "coverReference", nullable = true, updatable = true)
@@ -46,12 +48,10 @@ public class Album extends BaseEntity {
 	
 	@NotNull
 	@OneToMany(mappedBy = "album", orphanRemoval = false, cascade = { CascadeType.REMOVE, CascadeType.REFRESH, CascadeType.MERGE, CascadeType.DETACH })
-	@Valid
 	private Set<Track> tracks;
 	
-	public Album(Document cover) {
+	public Album() {
 		this.tracks = Collections.emptySet();
-		this.cover = cover;
 	}
 
 	@JsonbTransient @XmlTransient
@@ -59,7 +59,7 @@ public class Album extends BaseEntity {
 		return cover;
 	}
 
-	protected void setCover(Document cover) {
+	public void setCover(Document cover) {
 		this.cover = cover;
 	}
 
@@ -82,20 +82,20 @@ public class Album extends BaseEntity {
 	}
 
 	@JsonbProperty @XmlAttribute
-	public Integer getReleaseYear() {
+	public short getReleaseYear() {
 		return releaseYear;
 	}
 
-	public void setReleaseYear(Integer releaseYear) {
+	public void setReleaseYear(short releaseYear) {
 		this.releaseYear = releaseYear;
 	}
 
 	@JsonbProperty @XmlAttribute
-	public Integer getTrackCount() {
+	public byte getTrackCount() {
 		return trackCount;
 	}
 
-	public void setTrackCount(Integer trackCount) {
+	public void setTrackCount(byte trackCount) {
 		this.trackCount = trackCount;
 	}
 	

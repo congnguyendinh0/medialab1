@@ -1,14 +1,16 @@
-module edu.sb.radio.server {
-	requires transitive java.sql;
-	requires transitive java.activation;
-	requires transitive java.instrument;
+module edu.sb.radio.model {
+	requires transitive java.logging;
+	requires transitive java.validation;
 	requires transitive javax.annotation.api;
-	requires transitive jdk.httpserver;
 
+	requires transitive java.xml.bind;
+	requires transitive java.json.bind;
+	requires transitive java.ws.rs;
+	requires transitive javax.persistence;
 	requires transitive eclipselink.minus.jpa;
-	requires transitive jersey.server;
-	requires transitive jersey.container.jdk.http;
 
-	requires transitive edu.sb.radio.model;
-	exports edu.sb.radio.server;
+	opens edu.sb.radio.persistence;
+	exports edu.sb.radio.persistence;
+	exports edu.sb.radio.service;
+	exports edu.sb.radio.util;
 }

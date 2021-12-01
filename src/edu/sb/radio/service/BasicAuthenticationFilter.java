@@ -34,7 +34,7 @@ public class BasicAuthenticationFilter implements ContainerRequestFilter {
 	/**
 	 * HTTP request header for the authenticated requester's identity.
 	 */
-	static public final String REQUESTER_IDENTITY = "Requester-Identity";
+	static public final String REQUESTER_IDENTITY = "X-Requester-Identity";
 
 
 	/**
@@ -70,23 +70,23 @@ public class BasicAuthenticationFilter implements ContainerRequestFilter {
 		//   failed authentication attempts clutter the server log with stack traces.
 		if(requestContext.getHeaderString(REQUESTER_IDENTITY) != null) throw new ClientErrorException(Status.BAD_REQUEST);
 		
-		String headerAuthorization = requestContext.getHeaderString("Authorization");
-		String textCredentials = headerAuthorization != "" ? headerAuthorization : null;
-		requestContext.getHeaders().remove(headerAuthorization);
+		final List<String> authenticationHeaders = requestContext.getHeaders().remove("Authorization");
+		final String textCredentials = authenticationHeaders == null || authenticationHeaders.isEmpty() ? null : authenticationHeaders.get(0);
 		
 		if (textCredentials != null) {
-			Basic parseTextCredentials = RestCredentials.newBasicInstance(textCredentials);
-			EntityManager entityManager = RestJpaLifecycleProvider.entityManager("radio");
-			List<Person> persons = entityManager
-					.createQuery("select p from Person as p where p.email = :email")
-					.setParameter("email", parseTextCredentials.getName())
+			final Basic credentials = RestCredentials.newBasicInstance(textCredentials);
+			final EntityManager entityManager = RestJpaLifecycleProvider.entityManager("radio");
+			final List<Person> people = entityManager
+					.createQuery("select p from Person as p where p.email = :email", Person.class)
+					.setParameter("email", credentials.getName())
 			        .getResultList();
-			if(persons.size() == 1) {
-				String passwordHash = HashCodes.sha2HashText(256, parseTextCredentials.getPassword());
+			if(people.size() == 1) {
+				final String passwordHash = HashCodes.sha2HashText(256, credentials.getPassword());
 				
-				if(passwordHash == persons.get(0).getPasswordHash()) {
-					requestContext.getHeaders().add("Requester-Identity", String.valueOf(persons.get(0).getIdentity()));
-				} 
+				if(passwordHash == people.get(0).getPasswordHash()) {
+					requestContext.getHeaders().add(REQUESTER_IDENTITY, String.valueOf(people.get(0).getIdentity()));
+					return;
+				}
 			} 
 		}
 		

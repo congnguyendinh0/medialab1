@@ -10,6 +10,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.PositiveOrZero;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -20,8 +22,8 @@ import edu.sb.radio.util.JsonProtectedPropertyStrategy;
 
 @Entity
 @Table(schema = "radio", name = "Track", indexes = { 
-		@Index(name = "artist", columnList = "artist", unique = false),
-		@Index(name = "genre", columnList = "genre", unique = false) 
+		@Index(columnList = "artist", unique = false),
+		@Index(columnList = "genre", unique = false) 
 })
 @PrimaryKeyJoinColumn(name = "trackIdentity")
 @JsonbVisibility(JsonProtectedPropertyStrategy.class)
@@ -39,20 +41,21 @@ public class Track extends BaseEntity {
 	@JoinColumn(name = "recordingReference", nullable = false, updatable = false, insertable = true)
 	private Document recording;
 	
-	@Column(nullable = false, name = "name", updatable = true)
-	@Size(min = 1, max = 127)
+	@Column(nullable = false, updatable = true, length = 127)
+	@NotNull @Size(min = 1, max = 127)
 	private String name;
 	
-	@Column(nullable = false, name = "artist", updatable = true)
-	@Size(min = 1, max = 127)
+	@Column(nullable = false, updatable = true, length = 127)
+	@NotNull @Size(min = 1, max = 127)
 	private String artist;
 	
-	@Column(nullable = false, name = "genre", updatable = true)
-	@Size(min = 1, max = 31)
+	@Column(nullable = false, updatable = true, length = 31)
+	@NotNull @Size(min = 1, max = 31)
 	private String genre;
 	
-	@Column(nullable = false, name = "ordinal", updatable = true)
-	private Integer ordinal;
+	@PositiveOrZero
+	@Column(nullable = false, updatable = true)
+	private byte ordinal;
 
 	protected Track() {
 		this(null, null, null);
@@ -119,11 +122,11 @@ public class Track extends BaseEntity {
 	}
 	
 	@JsonbProperty @XmlAttribute
-	public Integer getOrdinal() {
+	public byte getOrdinal() {
 		return ordinal;
 	}
 	
-	public void setOrdinal(Integer ordinal) {
+	public void setOrdinal(byte ordinal) {
 		this.ordinal = ordinal;
 	}
 	

@@ -7,8 +7,12 @@ import java.util.Set;
 import javax.json.bind.annotation.JsonbProperty;
 import javax.json.bind.annotation.JsonbTransient;
 import javax.json.bind.annotation.JsonbVisibility;
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
 import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -19,13 +23,17 @@ import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.PrimaryKeyJoinColumn;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 import javax.validation.Valid;
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+
+import org.eclipse.persistence.annotations.CacheIndex;
 
 import edu.sb.radio.util.HashCodes;
 import edu.sb.radio.util.JsonProtectedPropertyStrategy;
@@ -38,37 +46,57 @@ import edu.sb.radio.util.JsonProtectedPropertyStrategy;
 public class Person extends BaseEntity {
 	static public enum Group { ADMIN, USER }
 	static private final String DEFAULT_PASSWORD_HASH = HashCodes.sha2HashText(256, "password");
+	
+	@NotNull @Email @Size(min = 3, max = 128)
+	@Column(nullable = false, updatable = true, length = 128, unique = true)
+	@CacheIndex(updateable = true)
+	private String email;
 
-	@Size(min = 64, max = 64)
-	@Column(nullable = false, name = "passwordHash", updatable = true)
+	@NotNull @Size(min = 64, max = 64)
+	@Column(nullable = false, updatable = true, length = 64)
 	private String passwordHash;
 	
-	@Valid
+	@NotNull
 	@Enumerated(EnumType.STRING)
-	@Column(nullable = false, name = "groupAlias", updatable = true)
+	@Column(name = "groupAlias", nullable = false, updatable = true)
 	private Group group;
 	
+	@NotNull @Valid
 	@Embedded
-	@Valid
+	@AttributeOverrides({
+		@AttributeOverride(name = "title", column = @Column(name = "title")),
+		@AttributeOverride(name = "family", column = @Column(name = "surname")),
+		@AttributeOverride(name = "given", column = @Column(name = "forename"))
+	})
 	private Name name;
 	
+	@NotNull @Valid
 	@Embedded
-	@Valid
+	@AttributeOverrides({
+		@AttributeOverride(name = "street", column = @Column(name = "street")),
+		@AttributeOverride(name = "postcode", column = @Column(name = "postcode")),
+		@AttributeOverride(name = "city", column = @Column(name = "city")),
+		@AttributeOverride(name = "country", column = @Column(name = "country"))
+	})
 	private Address address;
 	
+	@NotNull
+	@ElementCollection
+	@CollectionTable(
+		schema = "radio",
+		name = "PhoneAssociation",
+		joinColumns = @JoinColumn(name = "personReference", nullable = false, updatable = true),
+		uniqueConstraints = @UniqueConstraint(columnNames = { "personReference", "phone" })
+	)
+	@Column(name = "phone", nullable = false, updatable = true, length = 16)
 	private Set<String> phones;
 	
-	@Email
-	@Size(min = 1, max = 128)
-	@Column(nullable = false, name = "email", unique = true, updatable = true)
-	private String email;
-	
-	@OneToMany(mappedBy = "negotiator", orphanRemoval = false, cascade = { CascadeType.REFRESH, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REMOVE })
-	@Valid
+	@NotNull
+	@OneToMany(mappedBy = "negotiator", orphanRemoval = true, cascade = { CascadeType.REFRESH, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REMOVE })
 	private Set<Negotiation> negotiations;
 	
-	@OneToMany(mappedBy = "owner", orphanRemoval = false, cascade = { CascadeType.REFRESH, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REMOVE })
-	@Valid
+	@NotNull
+	@OneToMany(mappedBy = "owner", orphanRemoval = true, cascade = { CascadeType.REFRESH, CascadeType.MERGE, CascadeType.DETACH, CascadeType.REMOVE })
 	private Set<Track> tracks;
 	
 	@ManyToOne(optional = false)
@@ -108,7 +136,7 @@ public class Person extends BaseEntity {
 		return avatar;
 	}
 
-	protected void setAvatar(Document avatar) {
+	public void setAvatar(Document avatar) {
 		this.avatar = avatar;
 	}
 	
@@ -153,7 +181,7 @@ public class Person extends BaseEntity {
 		return name;
 	}
 
-	public void setName(Name name) {
+	protected void setName(Name name) {
 		this.name = name;
 	}
 
@@ -162,16 +190,20 @@ public class Person extends BaseEntity {
 		return address;
 	}
 
-	public void setAddress(Address address) {
+	protected void setAddress(Address address) {
 		this.address = address;
 	}
 	
 	/**
 	 * Aufgabe 2
 	 */
-//	@JsonbProperty @XmlAttribute
-//	protected abstract Long getAvatarReference();
-//	
-//	@JsonbProperty @XmlAttribute
-//	protected abstract long[] getTrackReferences();
+	@JsonbProperty @XmlAttribute
+	protected Long getAvatarReference() {
+		return this.avatar == null ? null : this.avatar.getIdentity();
+	}
+	
+	@JsonbProperty @XmlAttribute
+	protected long[] getTrackReferences() {
+		return this.tracks.stream().mapToLong(Track::getIdentity).toArray();
+	}
 }
