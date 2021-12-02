@@ -103,8 +103,8 @@ public class Album extends BaseEntity {
 	 * Aufgabe 2
 	 */
 //	@JsonbProperty @XmlAttribute
-//	protected abstract Long getCoverReference();
+//	protected Long getCoverReference();
 //	
 //	@JsonbProperty @XmlAttribute
-//	protected abstract long[] getTrackReferences();
+//	protected long[] getTrackReferences();
 }
