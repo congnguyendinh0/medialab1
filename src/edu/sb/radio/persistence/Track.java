@@ -133,13 +133,19 @@ public class Track extends BaseEntity {
 	
 	/**
 	 * Aufgabe 2
-	 */
-//	@JsonbProperty @XmlAttribute
-//	protected Long getAlbumReference();
-//	
-//	@JsonbProperty @XmlAttribute
-//	protected Long getOwnerReference();
-//	
-//	@JsonbProperty @XmlAttribute
-//	protected Long getRecordingReference();
+	 */	
+	@JsonbProperty @XmlAttribute
+	protected Long getAlbumReference() {
+		return this.album == null ? null : this.album.getIdentity();
+	}
+	
+	@JsonbProperty @XmlAttribute
+	protected Long getOwnerReference() {
+		return this.owner == null ? null : this.owner.getIdentity();
+	}
+	
+	@JsonbProperty @XmlAttribute
+	protected Long getRecordingReference() {
+		return this.recording == null ? null : this.recording.getIdentity();
+	}
 }

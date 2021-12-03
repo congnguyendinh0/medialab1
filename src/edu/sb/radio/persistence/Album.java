@@ -101,10 +101,14 @@ public class Album extends BaseEntity {
 	
 	/**
 	 * Aufgabe 2
-	 */
-//	@JsonbProperty @XmlAttribute
-//	protected Long getCoverReference();
-//	
-//	@JsonbProperty @XmlAttribute
-//	protected long[] getTrackReferences();
+	 */	
+	@JsonbProperty @XmlAttribute
+	protected Long getCoverReference() {
+		return this.cover == null ? null : this.cover.getIdentity();
+	}
+	
+	@JsonbProperty @XmlAttribute
+	protected long[] getTrackReferences() {
+		return this.tracks.stream().mapToLong(Track::getIdentity).toArray();
+	}
 }
