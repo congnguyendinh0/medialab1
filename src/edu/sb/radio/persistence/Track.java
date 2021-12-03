@@ -135,11 +135,11 @@ public class Track extends BaseEntity {
 	 * Aufgabe 2
 	 */
 //	@JsonbProperty @XmlAttribute
-//	protected abstract Long getAlbumReference();
+//	protected Long getAlbumReference();
 //	
 //	@JsonbProperty @XmlAttribute
-//	protected abstract Long getOwnerReference();
+//	protected Long getOwnerReference();
 //	
 //	@JsonbProperty @XmlAttribute
-//	protected abstract Long getRecordingReference();
+//	protected Long getRecordingReference();
 }
